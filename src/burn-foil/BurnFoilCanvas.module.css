@@ -1,0 +1,22 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.fallback {
+  align-items: center;
+  color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  display: flex;
+  font: 500 14px/1.4 ui-sans-serif, system-ui, sans-serif;
+  height: 100%;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
