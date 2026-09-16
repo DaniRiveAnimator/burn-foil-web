@@ -61,6 +61,7 @@ function toolcraftServerIdentityPlugin(): Plugin {
 }
 
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? "/burn-foil-web/" : "/",
   plugins: [toolcraftServerIdentityPlugin(), tailwindcss(), react()],
   server: testDependencyRoot
     ? {

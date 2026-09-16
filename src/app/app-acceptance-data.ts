@@ -154,6 +154,20 @@ const appAcceptanceSource: readonly ToolcraftComponentAcceptance[] = [
     id: "source.opacity",
     target: "source.opacity",
   }),
+  controlAcceptance({
+    componentType: "color",
+    expectedObservable:
+      "Div color recolors the visible source image while preserving the transparent burned-out region.",
+    id: "source.tintColor",
+    target: "source.tintColor",
+  }),
+  controlAcceptance({
+    componentType: "slider",
+    expectedObservable:
+      "Div tint controls how strongly the source image is recolored.",
+    id: "source.tintStrength",
+    target: "source.tintStrength",
+  }),
   {
     ...controlAcceptance({
       componentType: "select",
@@ -202,6 +216,13 @@ const appAcceptanceSource: readonly ToolcraftComponentAcceptance[] = [
   controlAcceptance({
     componentType: "slider",
     expectedObservable:
+      "Fire size widens the orange burn band without changing the transparent reveal mask.",
+    id: "fire.flameSize",
+    target: "fire.flameSize",
+  }),
+  controlAcceptance({
+    componentType: "slider",
+    expectedObservable:
       "Noise scale changes the ragged fire-front detail.",
     id: "fire.noiseScale",
     target: "fire.noiseScale",
@@ -212,6 +233,27 @@ const appAcceptanceSource: readonly ToolcraftComponentAcceptance[] = [
       "Edge glow changes the visible brightness of the active burn edge.",
     id: "fire.edgeGlow",
     target: "fire.edgeGlow",
+  }),
+  controlAcceptance({
+    componentType: "slider",
+    expectedObservable:
+      "Fire intensity increases the visible emission and rim brightness around the burn front.",
+    id: "fire.intensity",
+    target: "fire.intensity",
+  }),
+  controlAcceptance({
+    componentType: "slider",
+    expectedObservable:
+      "Trail strength changes how strongly the selected residue color tints the burned trail.",
+    id: "fire.trailStrength",
+    target: "fire.trailStrength",
+  }),
+  controlAcceptance({
+    componentType: "color",
+    expectedObservable:
+      "Trail color changes the soft residue color around the burning edge.",
+    id: "fire.trailColor",
+    target: "fire.trailColor",
   }),
   controlAcceptance({
     componentType: "color",
@@ -275,6 +317,23 @@ const appAcceptanceSource: readonly ToolcraftComponentAcceptance[] = [
       "Distortion size changes the heat-warp radius around the burn front.",
     id: "heat.distortionSize",
     target: "heat.distortionSize",
+  }),
+  {
+    ...controlAcceptance({
+      componentType: "select",
+      expectedObservable:
+        "Shader quality swaps between full and lite compiled WebGL variants while preserving the same burn-mask logic.",
+      id: "shader.qualityPreset",
+      target: "shader.qualityPreset",
+    }),
+    optionCoverage: ["lite", "full"],
+  },
+  controlAcceptance({
+    componentType: "slider",
+    expectedObservable:
+      "Max pixels changes preview backing resolution and reduces fragment shader cost.",
+    id: "performance.maxPixelSize",
+    target: "performance.maxPixelSize",
   }),
   {
     automated: true,
@@ -425,12 +484,14 @@ export const appControlSectionInventory: readonly ToolcraftControlSectionInvento
     entityId: "source-timing",
     groupingReason:
       "These controls tune the burn cycle over the currently selected source image.",
-    id: "source.part-source-autocycle-v2ihyv",
+    id: "source.part-source-autocycle-1hhfbgt",
     targets: [
       "source.autoCycle",
       "source.progress",
       "source.timeScale",
       "source.opacity",
+      "source.tintColor",
+      "source.tintStrength",
     ],
     title: "Source",
   },
@@ -457,8 +518,12 @@ export const appControlSectionInventory: readonly ToolcraftControlSectionInvento
     id: "fire-detail",
     targets: [
       "fire.emberWidth",
+      "fire.flameSize",
       "fire.noiseScale",
       "fire.edgeGlow",
+      "fire.intensity",
+      "fire.trailStrength",
+      "fire.trailColor",
       "fire.emberColor",
       "fire.fireColor",
       "fire.hotColor",
@@ -480,6 +545,15 @@ export const appControlSectionInventory: readonly ToolcraftControlSectionInvento
       "heat.distortionSize",
     ],
     title: "Heat And Light",
+  },
+  {
+    entity: "Preview quality",
+    entityId: "preview-quality",
+    groupingReason:
+      "These controls trade live preview cost against shader detail without changing source image or burn shape.",
+    id: "quality",
+    targets: ["shader.qualityPreset", "performance.maxPixelSize"],
+    title: "Quality",
   },
   {
     entity: "Image export",

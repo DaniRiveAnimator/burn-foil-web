@@ -26,7 +26,6 @@ import styles from "./BurnFoilCanvas.module.css";
 
 type BurnFoilStateSlice = {
   mediaAssets: ToolcraftMediaAsset[];
-  renderScale: number;
   values: ToolcraftState["values"];
 };
 
@@ -38,15 +37,8 @@ function selectBurnFoilState(state: ToolcraftState): BurnFoilStateSlice {
         asset.lifecycle !== "unavailable" &&
         asset.sourceTarget === BURN_FOIL_SOURCE_TARGET,
     ),
-    renderScale: readRenderScale(state.values["canvas.renderScale"]),
     values: state.values,
   };
-}
-
-function readRenderScale(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value)
-    ? Math.max(1, Math.min(2, value))
-    : 2;
 }
 
 function getSourceAsset(
@@ -93,6 +85,7 @@ export function BurnFoilCanvas(): React.JSX.Element {
     let alive = true;
     let raf = 0;
     let start = performance.now();
+    const manualTimeSeconds = start / 1000;
     let image: HTMLImageElement | null = null;
 
     void loadBurnFoilImage(sourceUrl).then(
@@ -107,23 +100,28 @@ export function BurnFoilCanvas(): React.JSX.Element {
             return;
           }
           const elapsed = ((performance.now() - start) / 1000) * timeScale;
-          const timeSeconds = autoPlay
-            ? elapsed
-            : performance.now() / 1000;
+          const timeSeconds = autoPlay ? elapsed : manualTimeSeconds;
           const progress = autoPlay
             ? (elapsed - Math.floor(elapsed)) * 100
             : settings.progress;
+          const pixelRatio = getPreviewPixelRatio({
+            cssHeight: frame.rect.height,
+            cssWidth: frame.rect.width,
+            maxPixelSize: settings.maxPixelSize,
+          });
           renderBurnFoilWebgl({
             cssHeight: frame.rect.height,
             cssWidth: frame.rect.width,
-            pixelRatio: window.devicePixelRatio * state.renderScale,
+            pixelRatio,
             settings: { ...settings, progress },
             sourceImage: image,
             targetCanvas: canvasRef.current,
             timeSeconds,
             transform: sourceAsset?.transform,
           });
-          raf = window.requestAnimationFrame(draw);
+          if (autoPlay) {
+            raf = window.requestAnimationFrame(draw);
+          }
         };
         draw();
       },
@@ -145,7 +143,6 @@ export function BurnFoilCanvas(): React.JSX.Element {
     settings,
     sourceAsset?.transform,
     sourceUrl,
-    state.renderScale,
     timeScale,
   ]);
 
@@ -167,4 +164,22 @@ export function BurnFoilCanvas(): React.JSX.Element {
       )}
     </div>
   );
+}
+
+function getPreviewPixelRatio({
+  cssHeight,
+  cssWidth,
+  maxPixelSize,
+}: {
+  cssHeight: number;
+  cssWidth: number;
+  maxPixelSize: number;
+}): number {
+  const maxCssSize = Math.max(cssWidth, cssHeight, 1);
+  const cappedRatio = clamp(maxPixelSize, 320, 2400) / maxCssSize;
+  return Math.max(0.5, Math.min(window.devicePixelRatio, cappedRatio));
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
